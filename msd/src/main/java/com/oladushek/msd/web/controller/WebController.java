@@ -8,14 +8,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 public class WebController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebController.class);
 
 
-    @PostMapping("/user")
-    public void createUser(@RequestBody CreateUserDto createUserDto){
+    @PostMapping("/users")
+    public void createUser(@Valid @RequestBody CreateUserDto createUserDto){
         //Получили запрос на создание пользоваателя и логируем его
 
         LOGGER.info("Create user request received: {}", createUserDto);
