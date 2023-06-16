@@ -2,6 +2,10 @@ package com.oladushek.msd.web.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 /**
  Чтобы воспользоваться DTO-классом необходим механизм десериализации -
@@ -12,6 +16,9 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 @JsonDeserialize(builder = CreateUserDto.Builder.class)
 public class CreateUserDto {
 
+    @NotNull(message = "Key 'name' is mandatory")
+    @Length(min = 5, max = 25, message = "Name length must be from 5 to 25")
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "Name must contain only letters a-z and A-Z")
     private final String name;
 
     public static Builder builder(){return new Builder();}
