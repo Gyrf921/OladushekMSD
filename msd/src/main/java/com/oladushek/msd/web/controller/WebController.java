@@ -3,6 +3,7 @@ package com.oladushek.msd.web.controller;
 
 import com.oladushek.msd.dao.UserInfoDao;
 import com.oladushek.msd.model.UserInfo;
+import com.oladushek.msd.service.UserInfoService;
 import com.oladushek.msd.web.dto.CreateUserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +18,11 @@ public class WebController {
 
     /**
      * Объект для операциями с БД
-     * TODO: Позже надо перейти на использование сервисного слоя
      */
-    private final UserInfoDao userInfoDao;
+    private final UserInfoService userInfoService;
 
-    public WebController(UserInfoDao userInfoDao) {
-        this.userInfoDao = userInfoDao;
+    public WebController(UserInfoService userInfoService) {
+        this.userInfoService = userInfoService;
     }
 
     @PostMapping("/users")
@@ -32,7 +32,7 @@ public class WebController {
         LOGGER.info("Create user request received: {}", createUserDto);
 
 
-        userInfoDao.createUser(
+        userInfoService.createUser(
                 UserInfo.builder().setName(createUserDto.getName()).build()
         );
     }
@@ -44,7 +44,7 @@ public class WebController {
      */
     @GetMapping("/users/{userName}")
     public UserInfo getUserInfo(@PathVariable String userName) {
-        return userInfoDao.getUserByName(userName);
+        return userInfoService.getUserInfoByName(userName);
     }
 
     /**
@@ -53,6 +53,6 @@ public class WebController {
      */
     @DeleteMapping("/users/{userName}")
     public void deleteUser(@PathVariable String userName) {
-        userInfoDao.deleteUser(userName);
+        userInfoService.deleteUser(userName);
     }
 }

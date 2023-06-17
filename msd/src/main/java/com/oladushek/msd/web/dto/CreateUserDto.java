@@ -21,6 +21,7 @@ public class CreateUserDto {
     @Pattern(regexp = "^[a-zA-Z]+$", message = "Name must contain only letters a-z and A-Z")
     private final String name;
 
+
     public static Builder builder(){return new Builder();}
 
     /**
