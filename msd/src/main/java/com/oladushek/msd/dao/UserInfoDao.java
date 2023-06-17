@@ -1,23 +1,33 @@
 package com.oladushek.msd.dao;
 
 import com.oladushek.msd.model.UserInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+
 
 public class UserInfoDao{
     /**
      * Объект для отправки SQL-запросов к БД
      */
-    private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public UserInfoDao(NamedParameterJdbcTemplate jdbcTemplate) {
+    private final JdbcTemplate jdbcTemplate;
+
+    public UserInfoDao(@Autowired JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     public void createUser(UserInfo userInfo) {
         jdbcTemplate.update(
-                "INSERT INTO user_info (name) VALUES (:name) ",
-                new MapSqlParameterSource("name", userInfo.getName())
+                "INSERT INTO Users (login, password,name,surname,age) VALUES (?,?,?,?,?) ",
+                userInfo.getLogin(),
+                userInfo.getPassword(),
+                userInfo.getName(),
+                userInfo.getSurname(),
+                userInfo.getAge()
         );
     }
 
@@ -27,10 +37,9 @@ public class UserInfoDao{
      * @return информация о пользователе
      */
     public UserInfo getUserByName(String userName) {
-        return jdbcTemplate.queryForObject("SELECT * FROM user_info WHERE name = :name",
-                new MapSqlParameterSource("name", userName),
-                new UserInfoRowMapper()
-        );
+        return jdbcTemplate.queryForObject("SELECT * FROM Users WHERE name = ?",
+                new Object[]{userName},
+                new UserInfoMapper());
     }
 
     /**
@@ -39,8 +48,6 @@ public class UserInfoDao{
      */
     public void deleteUser(String userName) {
         jdbcTemplate.update(
-                "DELETE FROM user_info WHERE name = :name",
-                new MapSqlParameterSource("name", userName)
-        );
+                "DELETE FROM Users WHERE name = ?", userName );
     }
 }

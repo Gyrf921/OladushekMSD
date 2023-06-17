@@ -16,9 +16,7 @@ public class UserInfoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserInfoService.class);
 
-
     private final UserInfoDao userInfoDao;
-
 
     /**
      * Иньекция испольуземых объектов через конструктор
@@ -28,8 +26,6 @@ public class UserInfoService {
         this.userInfoDao = userInfoDao;
     }
 
-
-
     /**
      * Создание пользователя
      * @param userInfo информация о пользователе
@@ -38,7 +34,7 @@ public class UserInfoService {
 
         checkNameSuspicious(userInfo.getName());
 
-        if (!isUserExists(userInfo.getName())) {
+       if (!isUserExists(userInfo.getName())) {
 
             userInfoDao.createUser(userInfo);
 

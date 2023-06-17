@@ -7,6 +7,7 @@ import com.oladushek.msd.service.UserInfoService;
 import com.oladushek.msd.web.dto.CreateUserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -19,9 +20,10 @@ public class WebController {
     /**
      * Объект для операциями с БД
      */
+
     private final UserInfoService userInfoService;
 
-    public WebController(UserInfoService userInfoService) {
+    public WebController(@Autowired UserInfoService userInfoService) {
         this.userInfoService = userInfoService;
     }
 
@@ -29,11 +31,16 @@ public class WebController {
     public void createUser(@Valid @RequestBody CreateUserDto createUserDto){
         //Получили запрос на создание пользоваателя и логируем его
 
-        LOGGER.info("Create user request received: {}", createUserDto);
+        LOGGER.info("Try to create user request received: {}", createUserDto);
 
 
         userInfoService.createUser(
-                UserInfo.builder().setName(createUserDto.getName()).build()
+                UserInfo.builder()
+                        .login(createUserDto.getLogin())
+                        .password(createUserDto.getPassword())
+                        .name(createUserDto.getName())
+                        .surname(createUserDto.getSurname())
+                        .age(createUserDto.getAge()).build()
         );
     }
 
