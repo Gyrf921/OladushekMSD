@@ -1,44 +1,48 @@
 package com.oladushek.msd.model;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
 
 @Builder
-@Data
-public class UserInfo {
-
-    private final String login;
-
-    private final String password;
-
-    private final String name;
-
-    private final String surname;
-
-    private final Integer age;
+@Getter
+@Setter
+@Entity
+@Table(name = "users_info", schema="public")
+public class UserInfo{
 
 
-/*    public static Builder builder() { return new Builder(); }
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
 
-    *//**
-     * Конструктор сделан закрытым, потому что объекты этого класса
-     * надо порождать таким образом:
-     * dto = User.builder().setName("John Doe").build()
-     *//*
-    private UserInfo(Builder builder) {
-        this.name = builder.name;
-    }*/
+    @Column(name="login", length=25, nullable=false)
+    private String login;
 
+    @Column(name="password", length=50, nullable=false)
+    private String password;
 
+    @Column(name="name", length=25, nullable=false)
+    private String name;
 
-   /* public static class Builder {
-        private String name;
+    @Column(name="surname", length=25, nullable=false)
+    private String surname;
 
-        public Builder setName(String name) {
-            this.name = name;
-            return this;
-        }
+    @Column(name="age", nullable=false)
+    private Integer age;
 
-        public UserInfo build() { return new UserInfo(this); }
-    }*/
+    public UserInfo() {
+    }
+
+    public UserInfo(long id, String login, String password, String name, String surname, Integer age) {
+        this.id = id;
+        this.login = login;
+        this.password = password;
+        this.name = name;
+        this.surname = surname;
+        this.age = age;
+    }
+
 }

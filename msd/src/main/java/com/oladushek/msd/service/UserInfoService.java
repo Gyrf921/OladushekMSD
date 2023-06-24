@@ -1,13 +1,18 @@
 package com.oladushek.msd.service;
 
-import com.oladushek.msd.dao.UserInfoDao;
+
+import com.oladushek.msd.exception.BadUserLoginException;
 import com.oladushek.msd.model.UserInfo;
+import com.oladushek.msd.reposiroty.UserInfoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -16,83 +21,92 @@ public class UserInfoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserInfoService.class);
 
-    private final UserInfoDao userInfoDao;
+    @Autowired
+    private UserInfoRepository userInfoRepository;
 
-    /**
-     * Иньекция испольуземых объектов через конструктор
-     * @param userInfoDao объект для работы с таблице user_info
-     */
-    public UserInfoService(UserInfoDao userInfoDao) {
-        this.userInfoDao = userInfoDao;
+    public List<UserInfo> getAllUsers() {
+
+        return userInfoRepository.findAll();
+
+    }
+
+
+    public Optional<UserInfo> getUserById(long id){
+
+        return userInfoRepository.findById(id);
+
     }
 
     /**
      * Создание пользователя
      * @param userInfo информация о пользователе
      */
-    public void createUser(UserInfo userInfo) {
+    public void createUser(UserInfo userInfo) throws BadUserLoginException {
 
-        checkNameSuspicious(userInfo.getName());
+        try {
+            checkNameSuspicious(userInfo.getLogin());
+        } catch (BadUserLoginException e) {
+            throw new RuntimeException(e);
+        }
 
-       if (!isUserExists(userInfo.getName())) {
-
-            userInfoDao.createUser(userInfo);
+        if (!isUserExists(userInfo.getLogin())) {
 
             LOGGER.info("User created by user info: {}", userInfo);
 
+            userInfoRepository.save(userInfo);
         } else {
 
-            // TODO Заменить на своё исключение
-            RuntimeException exception = new RuntimeException("User already exists with name " + userInfo.getName());
+            BadUserLoginException exception = new BadUserLoginException("User already exists with login " + userInfo.getLogin());
 
             LOGGER.error("Error creating user by user info {}", userInfo, exception);
 
             throw exception;
-        }
-    }
+
+        }}
     /**
      * Возвращает информацию о пользователе по его имени
-     * @param userName имя пользователя
+     * @param userLogin имя пользователя
      * @return информация о пользователе
      */
-    public UserInfo getUserInfoByName(String userName) {
+    public Optional<UserInfo> getUserInfoByLogin(String userLogin) {
 
         try {
 
-            return userInfoDao.getUserByName(userName);
+            return userInfoRepository.findByLogin(userLogin);
 
         } catch (EmptyResultDataAccessException e) {
 
-            LOGGER.error("Error getting info by name {}", userName, e);
+            LOGGER.error("Error getting info by name {}", userLogin, e);
 
-            // TODO Заменить на своё исключение
-            throw new RuntimeException("User not found by name " + userName);
+            throw new RuntimeException("User not found by name " + userLogin);
         }
     }
 
     /**
      * Удаление пользователя
-     * @param userName имя пользователя
+     * @param userLogin Логин пользователя
      */
-    public void deleteUser(String userName) {
+    @Transactional
+    public void deleteUser(String userLogin) {
 
-        if (isUserExists(userName)) {
+        if (isUserExists(userLogin)) {
 
-            userInfoDao.deleteUser(userName);
+            userInfoRepository.deleteByLogin(userLogin);
 
-            LOGGER.info("User with name {} deleted", userName);
+            LOGGER.info("User with login {} deleted", userLogin);
         }
     }
 
 
     /**
      * Проверка на сущестование пользователя с именем
-     * @param userName имя пользователя
+     * @param userLogin имя пользователя
      * @return true - если пользователь сущестует, иначе - false
      */
-    private boolean isUserExists(String userName) {
+    private boolean isUserExists(String userLogin) {
         try {
-            userInfoDao.getUserByName(userName);
+
+            userInfoRepository.findByLogin(userLogin);
 
             return  true;
 
@@ -105,14 +119,13 @@ public class UserInfoService {
 
     /**
      * Проверка на то, что имя пользователя не содержится в стоп-листе
-     * @param userName имя пользователя
+     * @param userLogin имя пользователя
      */
-    private void checkNameSuspicious(String userName) {
+    private void checkNameSuspicious(String userLogin) throws BadUserLoginException {
 
-        if (Set.of("administrator", "root", "system").contains(userName)) {
+        if (Set.of("administrator", "root", "system").contains(userLogin)) {
 
-            // TODO: Заменить на свое исключение
-            RuntimeException exception = new RuntimeException(userName + " is unacceptable");
+            BadUserLoginException exception = new BadUserLoginException(userLogin + " is unacceptable");
 
             LOGGER.error("Check name failed", exception);
 
